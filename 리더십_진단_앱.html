@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>리더십 진단 | Leadership Reboot</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161923;
+    --surface2: #1e2330;
+    --border: #2a3045;
+    --accent1: #4f8ef7;
+    --accent2: #7c5cbf;
+    --accent3: #f76e6e;
+    --gold: #e8c96e;
+    --green: #4ecfa0;
+    --text: #e8eaf0;
+    --muted: #7a849a;
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BG noise/gradient ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,142,247,.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 90%, rgba(124,92,191,.10) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 60px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  header .badge {
+    display: inline-block;
+    font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent1); background: rgba(79,142,247,.1);
+    border: 1px solid rgba(79,142,247,.25);
+    padding: 5px 14px; border-radius: 99px; margin-bottom: 18px;
+  }
+  header h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(26px,5vw,38px); font-weight: 700;
+    line-height: 1.25; margin-bottom: 12px;
+  }
+  header h1 em { color: var(--accent1); font-style: normal; }
+  header p { color: var(--muted); font-size: 14px; line-height: 1.8; }
+
+  /* ── SECTION TABS ── */
+  .section-nav {
+    display: flex; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 6px;
+    margin-bottom: 32px;
+  }
+  .section-nav button {
+    flex: 1; padding: 10px 8px; border: none; border-radius: 10px;
+    background: transparent; color: var(--muted);
+    font-size: 13px; font-family: inherit; cursor: pointer;
+    transition: all .2s; font-weight: 500;
+  }
+  .section-nav button.active {
+    background: var(--accent1); color: #fff;
+    box-shadow: 0 4px 16px rgba(79,142,247,.35);
+  }
+
+  /* ── STEP INDICATOR ── */
+  .step-info {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .step-info .label { font-size: 13px; color: var(--muted); }
+  .step-info .counter { font-size: 13px; color: var(--accent1); font-weight: 600; }
+  .progress-bar {
+    height: 3px; background: var(--border); border-radius: 99px;
+    margin-bottom: 28px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    border-radius: 99px; transition: width .4s ease;
+  }
+
+  /* ── QUESTION CARD ── */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    margin-bottom: 16px;
+    transition: border-color .2s;
+  }
+  .q-card.answered { border-color: rgba(79,142,247,.4); }
+  .q-num {
+    font-size: 11px; letter-spacing: .15em; color: var(--accent1);
+    text-transform: uppercase; margin-bottom: 10px; font-weight: 600;
+  }
+  .q-text {
+    font-size: 15px; line-height: 1.75; color: var(--text);
+    margin-bottom: 20px; font-weight: 400;
+  }
+
+  /* ── SCALE BUTTONS ── */
+  .scale { display: flex; gap: 8px; flex-wrap: wrap; }
+  .scale-label {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--muted);
+    margin-bottom: 8px; padding: 0 2px;
+  }
+  .score-btn {
+    flex: 1; min-width: 42px; padding: 11px 4px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--muted);
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all .18s; text-align: center;
+  }
+  .score-btn:hover { border-color: var(--accent1); color: var(--accent1); }
+  .score-btn.selected {
+    background: var(--accent1); border-color: var(--accent1);
+    color: #fff; box-shadow: 0 4px 14px rgba(79,142,247,.4);
+    transform: translateY(-2px);
+  }
+
+  /* fatigue style (0–3) */
+  .score-btn.fat-selected {
+    background: var(--accent2); border-color: var(--accent2);
+    color: #fff; box-shadow: 0 4px 14px rgba(124,92,191,.4);
+    transform: translateY(-2px);
+  }
+
+  /* ── NAV BUTTONS ── */
+  .nav-row {
+    display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;
+  }
+  .btn {
+    padding: 13px 28px; border-radius: 10px; border: none;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-ghost {
+    background: var(--surface2); color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #fff; box-shadow: 0 6px 20px rgba(79,142,247,.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,142,247,.45); }
+  .btn-primary:disabled { opacity: .4; transform: none; cursor: default; }
+  .btn-danger {
+    background: linear-gradient(135deg, var(--accent3), var(--accent2));
+    color: #fff;
+  }
+
+  /* ── RESULT PAGE ── */
+  #result { display: none; }
+  .result-hero {
+    text-align: center; padding: 48px 20px 36px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 24px; position: relative; overflow: hidden;
+  }
+  .result-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(79,142,247,.12), transparent);
+    pointer-events: none;
+  }
+  .result-type-badge {
+    display: inline-block;
+    font-size: 12px; letter-spacing: .15em;
+    padding: 6px 16px; border-radius: 99px; margin-bottom: 16px; font-weight: 600;
+  }
+  .result-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(22px,4vw,30px); font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .result-score-row {
+    display: flex; justify-content: center; gap: 32px; margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .score-pill {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 24px; text-align: center; min-width: 130px;
+  }
+  .score-pill .val {
+    font-size: 32px; font-weight: 700; line-height: 1;
+    font-family: 'Noto Serif KR', serif;
+  }
+  .score-pill .lbl { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* gauge bar */
+  .gauge-wrap { margin: 0 0 24px; }
+  .gauge-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .gauge-track {
+    height: 8px; background: var(--border); border-radius: 99px; overflow: hidden;
+  }
+  .gauge-fill {
+    height: 100%; border-radius: 99px;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* result detail cards */
+  .result-detail {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px 24px;
+    margin-bottom: 16px;
+  }
+  .detail-head {
+    font-size: 13px; font-weight: 700; letter-spacing: .05em;
+    margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  }
+  .detail-body { font-size: 14px; line-height: 1.8; color: #c5cad8; }
+  .detail-body b { color: var(--text); font-weight: 600; }
+
+  /* ── INTRO SPLASH ── */
+  #intro { }
+  .intro-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    margin: 28px 0 36px;
+  }
+  @media(max-width:500px){ .intro-cards { grid-template-columns: 1fr; } }
+  .intro-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .intro-card .ico { font-size: 26px; margin-bottom: 10px; }
+  .intro-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .intro-card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* ── UTIL ── */
+  .hidden { display: none !important; }
+  .text-center { text-align: center; }
+  
+  /* reset btn */
+  .reset-row { text-align: center; margin-top: 32px; }
+  .btn-reset {
+    background: var(--surface2); color: var(--muted);
+    border: 1px solid var(--border); padding: 11px 24px;
+    border-radius: 10px; font-family: inherit; font-size: 13px;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+  /* fatigue chip labels */
+  .chip-labels {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .chip { font-size: 11px; color: var(--muted); background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="badge">Leadership Reboot · 자가 진단</div>
+    <h1>당신의 리더십은<br><em>지금 어디에</em> 있나요?</h1>
+    <p>코칭형 리더십 유형 진단 + 관리 피로도 검사<br>총 17문항 · 약 3~5분 소요</p>
+  </header>
+
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="intro-cards">
+      <div class="intro-card">
+        <div class="ico">🧭</div>
+        <h3>검사 1 · 리더십 유형</h3>
+        <p>Stowell(1986) 코칭 리더십 모델 기반 7문항<br>1~5점 척도</p>
+      </div>
+      <div class="intro-card">
+        <div class="ico">🔋</div>
+        <h3>검사 2 · 관리 피로도</h3>
+        <p>리더의 심리적 소진 자가 진단 10문항<br>0~3점 척도</p>
+      </div>
+      <div class="intro-card">
+        <div class="ico">📊</div>
+        <h3>즉시 결과 확인</h3>
+        <p>두 검사 완료 후 유형별 해석과 맞춤형 가이드를 즉시 확인할 수 있습니다.</p>
+      </div>
+      <div class="intro-card">
+        <div class="ico">🔒</div>
+        <h3>완전 비공개</h3>
+        <p>모든 응답은 브라우저 내에서만 처리되며 외부로 전송되지 않습니다.</p>
+      </div>
+    </div>
+    <div class="nav-row" style="justify-content:center">
+      <button class="btn btn-primary" onclick="startTest()">진단 시작하기 →</button>
+    </div>
+  </div>
+
+  <!-- TEST AREA -->
+  <div id="test-area" class="hidden">
+    <!-- Tab nav -->
+    <div class="section-nav">
+      <button id="tab1" class="active" onclick="jumpTab(1)">① 리더십 유형 (7문항)</button>
+      <button id="tab2" onclick="jumpTab(2)">② 관리 피로도 (10문항)</button>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div id="sec1">
+      <div class="step-info">
+        <span class="label">리더십 유형 진단 · 1~5점 척도</span>
+        <span class="counter" id="prog1-count">0 / 7</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog1" style="width:0%"></div></div>
+      <div id="qs1"></div>
+      <div class="nav-row">
+        <button class="btn btn-primary" id="go2-btn" onclick="goToSec2()" disabled>다음 검사로 →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div id="sec2" class="hidden">
+      <div class="step-info">
+        <span class="label">관리 피로도 진단 · 0~3점 척도</span>
+        <span class="counter" id="prog2-count">0 / 10</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog2" style="width:0%"></div></div>
+      <div id="qs2"></div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="backToSec1()">← 이전</button>
+        <button class="btn btn-primary" id="result-btn" onclick="showResult()" disabled>결과 확인하기 ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-hero" id="hero-card">
+      <div class="result-type-badge" id="type-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-score-row">
+        <div class="score-pill">
+          <div class="val" id="s1-val" style="color:var(--accent1)">—</div>
+          <div class="lbl">리더십 점수<br>(만점 35)</div>
+        </div>
+        <div class="score-pill">
+          <div class="val" id="s2-val" style="color:var(--accent2)">—</div>
+          <div class="lbl">피로도 점수<br>(만점 30)</div>
+        </div>
+      </div>
+      <!-- gauge 1 -->
+      <div class="gauge-wrap">
+        <div class="gauge-label"><span>리더십 점수</span><span id="g1-pct"></span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g1-fill" style="width:0%;background:linear-gradient(90deg,var(--accent1),var(--accent2))"></div></div>
+      </div>
+      <!-- gauge 2 -->
+      <div class="gauge-wrap">
+        <div class="gauge-label"><span>관리 피로도</span><span id="g2-pct"></span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="g2-fill" style="width:0%;background:linear-gradient(90deg,var(--accent2),var(--accent3))"></div></div>
+      </div>
+    </div>
+
+    <div id="detail1" class="result-detail"></div>
+    <div id="detail2" class="result-detail"></div>
+    <div id="detail-combo" class="result-detail" style="border-color:rgba(79,142,247,.3)"></div>
+
+    <div class="reset-row">
+      <button class="btn-reset" onclick="resetAll()">↺ 다시 검사하기</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ─────────────────────────────────────────
+   DATA
+───────────────────────────────────────── */
+const Q1 = [
+  "나는 팀의 목표를 정할 때 일방적으로 지시하기보다 구성원과 공유하고 합의하여 결정한다.",
+  "나는 구성원이 스스로 자신의 잠재 역량을 찾고 개발할 수 있도록 학습 기회를 적극 지원한다.",
+  "나는 구성원의 성과를 단순히 측정하는 데 그치지 않고, 성장을 돕는 건설적 피드백을 제공한다.",
+  "나는 구성원과 신뢰를 쌓기 위해 그들의 의견을 판단 없이 경청하고 존중하는 태도를 보인다.",
+  "나는 구성원에게 답을 직접 알려주기보다 열린 질문을 통해 스스로 답을 찾도록 유도한다.",
+  "나는 구성원을 단순히 지시를 따르는 수동적 존재가 아닌, 변화의 주체로 인식한다.",
+  "나는 급변하는 환경(AI, 세대 갈등 등)에 맞춰 과거의 통제 방식보다 유연한 소통을 지향한다."
+];
+const S1 = ["전혀 그렇지 않다","그렇지 않다","보통이다","그렇다","매우 그렇다"];
+
+const Q2 = [
+  "가치관과 일하는 방식이 다른 다양한 세대(MZ세대 등)와 소통하는 것이 기가 빨린다.",
+  "구성원 간의 갈등 상황을 중재하는 과정에서 업무보다 더 큰 심리적 소진을 느낀다.",
+  "과거의 지시·통제 방식이 통하지 않아 리더십의 한계와 흔들림을 경험한다.",
+  "업무 성과 관리 외에 구성원의 성장과 심리까지 케어해야 한다는 사실이 큰 부담이다.",
+  "AI 및 디지털 기술 확산 등 급변하는 환경에 적응하고 리더의 역할을 재정의하는 것이 버겁다.",
+  "내가 리더로서 잘하고 있는지에 대한 확신이 없고 자기 정체성에 혼란을 느낀다.",
+  "업무 성과 달성과 구성원과의 관계 유지 사이에서 정서적 에너지가 고갈되었다고 느낀다.",
+  "당장의 업무 처리로 인해 조직의 미래나 외부 트렌드를 살필 심리적 여유가 전혀 없다.",
+  "업무 중 발생하는 부정적 감정(분노, 불안 등)을 조절하고 다스리기가 점점 어려워진다.",
+  "현장에서 발생하는 고충을 상의할 상대가 없어 고립감이나 막막함을 느낄 때가 많다."
+];
+const S2 = ["전혀 그렇지 않다","가끔 그렇다","자주 그렇다","항상 그렇다"];
+
+let ans1 = new Array(7).fill(null);
+let ans2 = new Array(10).fill(null);
+
+/* ─────────────────────────────────────────
+   BUILD QUESTIONS
+───────────────────────────────────────── */
+function buildQ(container, questions, answers, scales, startVal, type) {
+  const el = document.getElementById(container);
+  el.innerHTML = '';
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card' + (answers[i] !== null ? ' answered' : '');
+    card.id = `card-${type}-${i}`;
+
+    const scaleHtml = scales.map((lbl, si) => {
+      const val = startVal + si;
+      const sel = answers[i] === val;
+      const cls = sel ? (type==='l' ? 'score-btn selected' : 'score-btn fat-selected') : 'score-btn';
+      return `<button class="${cls}" data-type="${type}" data-q="${i}" data-val="${val}" onclick="pick(this)">${val}</button>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="q-num">Q${i+1}</div>
+      <div class="q-text">${q}</div>
+      <div class="chip-labels">${scales.map((l,si)=>`<span class="chip">${startVal+si}: ${l}</span>`).join('')}</div>
+      <div class="scale">${scaleHtml}</div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+function pick(btn) {
+  const type = btn.dataset.type;
+  const qi = parseInt(btn.dataset.q);
+  const val = parseInt(btn.dataset.val);
+  const selCls = type === 'l' ? 'selected' : 'fat-selected';
+
+  if (type === 'l') {
+    ans1[qi] = val;
+    document.querySelectorAll(`[data-type="l"][data-q="${qi}"]`).forEach(b => b.classList.remove('selected','fat-selected'));
+  } else {
+    ans2[qi] = val;
+    document.querySelectorAll(`[data-type="f"][data-q="${qi}"]`).forEach(b => b.classList.remove('selected','fat-selected'));
+  }
+  btn.classList.add(selCls);
+
+  const card = document.getElementById(`card-${type}-${qi}`);
+  card.classList.add('answered');
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const done1 = ans1.filter(v => v !== null).length;
+  const done2 = ans2.filter(v => v !== null).length;
+  document.getElementById('prog1').style.width = (done1/7*100) + '%';
+  document.getElementById('prog2').style.width = (done2/10*100) + '%';
+  document.getElementById('prog1-count').textContent = `${done1} / 7`;
+  document.getElementById('prog2-count').textContent = `${done2} / 10`;
+  document.getElementById('go2-btn').disabled = done1 < 7;
+  document.getElementById('result-btn').disabled = done2 < 10;
+}
+
+/* ─────────────────────────────────────────
+   NAVIGATION
+───────────────────────────────────────── */
+function startTest() {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('test-area').classList.remove('hidden');
+  buildQ('qs1', Q1, ans1, S1, 1, 'l');
+  buildQ('qs2', Q2, ans2, S2, 0, 'f');
+  updateProgress();
+}
+
+function jumpTab(n) {
+  if(n===2 && ans1.filter(v=>v!==null).length < 7) {
+    alert('리더십 유형 진단(7문항)을 모두 완료해 주세요.');
+    return;
+  }
+  showSec(n);
+}
+
+function showSec(n) {
+  document.getElementById('sec1').classList.toggle('hidden', n!==1);
+  document.getElementById('sec2').classList.toggle('hidden', n!==2);
+  document.getElementById('tab1').classList.toggle('active', n===1);
+  document.getElementById('tab2').classList.toggle('active', n===2);
+}
+
+function goToSec2() {
+  if(ans1.filter(v=>v!==null).length < 7) return;
+  showSec(2);
+}
+function backToSec1() { showSec(1); }
+
+function resetAll() {
+  ans1 = new Array(7).fill(null);
+  ans2 = new Array(10).fill(null);
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('intro').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ─────────────────────────────────────────
+   RESULT
+───────────────────────────────────────── */
+function showResult() {
+  if(ans2.filter(v=>v!==null).length < 10) return;
+
+  const s1 = ans1.reduce((a,b)=>a+b,0);
+  const s2 = ans2.reduce((a,b)=>a+b,0);
+
+  // types
+  let lType, lColor, lDesc, lGuide;
+  if (s1 >= 25) {
+    lType = '코칭형 리더'; lColor = '#4ecfa0';
+    lDesc = `구성원의 성장과 학습을 촉진하여 조직 목표를 달성하는 <b>현대적 리더십의 전형</b>입니다. 지시보다 질문과 경청을 사용하는 <b>Pull형 리더십</b>을 발휘하며, 구성원에게 자율성과 책임감을 부여합니다.`;
+    lGuide = `팀원의 유능감과 조직 몰입이 높아지며, 변화하는 환경에 유연하게 대응하는 조직 문화를 형성합니다. 지금의 리더십 스타일을 유지하면서 더욱 정교한 코칭 스킬을 개발해 나가세요.`;
+  } else if (s1 >= 15) {
+    lType = '과도기형 리더'; lColor = '#e8c96e';
+    lDesc = `기존의 관리 방식에 한계를 느끼고 코칭적 접근을 시도하고 있으나, <b>아직 습관화되지 않은 단계</b>입니다. 성과 압박과 관계 관리 사이에서 심리적 피로감을 느낄 수 있습니다.`;
+    lGuide = `<b>GROW 모델</b>과 같은 구체적인 코칭 대화 프로세스를 내재화하는 것이 필요합니다. 리더십을 '리부트(Reboot)'하는 전환 과정이 현재 가장 중요한 과제입니다.`;
+  } else {
+    lType = '전통적 관리자'; lColor = '#f76e6e';
+    lDesc = `강력한 카리스마와 명령·통제 중심의 <b>보스형 리더</b> 스타일을 유지하고 있습니다. 복잡성이 증가하고 세대 가치관이 충돌하는 현재 조직 환경에서는 구성원의 이직과 소진을 초래할 위험이 큽니다.`;
+    lGuide = `모든 정답을 리더가 가져야 한다는 압박에서 벗어나, <b>성장 촉진자(Coach)</b>로서의 역할 전환과 인식 변화가 시급합니다.`;
+  }
+
+  let fType, fColor, fDesc, fGuide;
+  if (s2 <= 12) {
+    fType = '안정 단계'; fColor = '#4ecfa0';
+    fDesc = `현재 리더십을 <b>안정적으로 발휘</b>하고 있으며, 환경 변화에 대응할 심리적 회복탄력성이 충분한 상태입니다.`;
+    fGuide = `현재의 긍정적인 '프레즌스(Presence)'를 유지하며, 개인적 리더십(Personal Leadership)의 핵심인 <b>자기 숙달(Self-mastery)</b>을 지속적으로 강화하세요.`;
+  } else if (s2 <= 24) {
+    fType = '주의 단계'; fColor = '#e8c96e';
+    fDesc = `관리 업무로 인한 <b>피로가 누적</b>되어 리더십 존재감이 흔들리기 시작했습니다. 성과와 관계 사이의 갈등으로 심리적 부담이 커진 상태입니다.`;
+    fGuide = `<b>'관점의 전환'</b>이 필요합니다. 독불장군식 관리에서 벗어나, 구성원에게 권한을 위임하고 자율성을 부여하는 코칭 리더십으로 리부트(Reboot)해야 할 시점입니다.`;
+  } else {
+    fType = '위험 단계'; fColor = '#f76e6e';
+    fDesc = `심각한 <b>리더십 번아웃</b> 상태입니다. 부정적 감정 조절이 어렵고 구성원과의 소통을 회피하려는 경향이 나타날 수 있어 조직 전체에 부정적인 영향을 줄 위험이 큽니다.`;
+    fGuide = `즉시 외부 전문가의 코칭이나 <b>Leadership Reboot 프로그램</b>에 참여하여 정서적 환기와 자기 인식(Self-awareness) 과정을 거쳐야 합니다. 리더 자신의 심리적 안정을 최우선으로 돌봐야 합니다.`;
+  }
+
+  // combo insight
+  let comboMsg = '';
+  if (s1 >= 25 && s2 <= 12) {
+    comboMsg = `✨ <b>이상적인 균형 상태</b>입니다. 코칭형 리더십과 안정적 심리 상태가 조화를 이루고 있어, 구성원과 조직 모두에게 긍정적인 영향을 미칠 수 있는 최적의 조건입니다.`;
+  } else if (s1 >= 25 && s2 >= 25) {
+    comboMsg = `⚠️ <b>주목!</b> 코칭형 리더십을 발휘하고 있지만, 내면의 소진이 심각합니다. 겉으로는 리더십이 발휘되는 것처럼 보여도 지속하기 어려운 상태입니다. 자신을 먼저 돌보는 것이 최우선입니다.`;
+  } else if (s1 < 15 && s2 >= 25) {
+    comboMsg = `🚨 <b>긴급 경보!</b> 전통적 관리 방식과 극심한 소진이 동시에 나타나고 있습니다. 지금 당장 전문 코칭이나 외부 지원이 필요합니다. 혼자 버티려 하지 마세요.`;
+  } else if (s1 < 25 && s2 >= 13) {
+    comboMsg = `💡 <b>전환점에 있습니다.</b> 리더십 스타일 변화와 심리적 회복, 두 가지를 함께 다루어야 합니다. GROW 모델 학습과 함께 소진 관리를 병행하는 것이 효과적입니다.`;
+  } else {
+    comboMsg = `📌 현재 상태를 바탕으로, 리더십 강화와 심리적 안정을 위한 꾸준한 노력이 성장의 열쇠입니다.`;
+  }
+
+  // render
+  document.getElementById('test-area').classList.add('hidden');
+  const r = document.getElementById('result');
+  r.style.display = 'block';
+
+  document.getElementById('type-badge').textContent = `${lType} · ${fType}`;
+  document.getElementById('type-badge').style.cssText = `background:${lColor}22;color:${lColor};border:1px solid ${lColor}55;`;
+  document.getElementById('result-title').textContent = `${lType}이며, 피로도 ${fType}`;
+  document.getElementById('s1-val').textContent = s1;
+  document.getElementById('s2-val').textContent = s2;
+
+  setTimeout(() => {
+    document.getElementById('g1-fill').style.width = (s1/35*100)+'%';
+    document.getElementById('g2-fill').style.width = (s2/30*100)+'%';
+    document.getElementById('g1-pct').textContent = `${s1} / 35점`;
+    document.getElementById('g2-pct').textContent = `${s2} / 30점`;
+  }, 100);
+
+  document.getElementById('detail1').innerHTML = `
+    <div class="detail-head" style="color:${lColor}">🧭 리더십 유형 해석 · ${lType} (${s1}점)</div>
+    <div class="detail-body">
+      <p>${lDesc}</p>
+      <br><p><b>가이드:</b> ${lGuide}</p>
+    </div>`;
+
+  document.getElementById('detail2').innerHTML = `
+    <div class="detail-head" style="color:${fColor}">🔋 관리 피로도 해석 · ${fType} (${s2}점)</div>
+    <div class="detail-body">
+      <p>${fDesc}</p>
+      <br><p><b>가이드:</b> ${fGuide}</p>
+    </div>`;
+
+  document.getElementById('detail-combo').innerHTML = `
+    <div class="detail-head" style="color:var(--accent1)">💬 종합 인사이트</div>
+    <div class="detail-body"><p>${comboMsg}</p>
+    <br><p style="color:var(--muted);font-size:13px">※ 본 진단지는 Stowell(1986) 코칭 리더십 모델, Whitmore(1992) GROW 모델을 기반으로 구성되었습니다. 전문 코칭·상담을 대체하지 않습니다.</p>
+    </div>`;
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
